@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static com.demo.springsecurity.security.UserRole.ADMIN;
+import static com.demo.springsecurity.security.UserRole.EMPLOYEE;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -43,9 +46,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UserDetails user = User.builder()
                 .username("john_doe")
                 .password(passwordEncoder.encode("password"))
-                .roles("EMPLOYEE") // ROLE_EMPLOYEE
+                .roles(EMPLOYEE.name()) // ROLE_EMPLOYEE
                 .build();
 
-        return new InMemoryUserDetailsManager(user);
+        UserDetails admin = User.builder()
+                .username("jane_doe")
+                .password(passwordEncoder.encode("admin"))
+                .roles(ADMIN.name()) // ROLE_ADMIN
+                .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
     }
 }
