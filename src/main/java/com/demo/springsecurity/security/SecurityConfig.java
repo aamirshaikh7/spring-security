@@ -31,6 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*")
                 .permitAll()
+                .antMatchers("/api/v1/employees/**").hasRole(EMPLOYEE.name())
                 .anyRequest()
                 .authenticated()
                 .and()
