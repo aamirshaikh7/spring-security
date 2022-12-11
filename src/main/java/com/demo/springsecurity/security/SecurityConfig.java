@@ -3,7 +3,7 @@ package com.demo.springsecurity.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -13,11 +13,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-import static com.demo.springsecurity.security.UserPermission.*;
 import static com.demo.springsecurity.security.UserRole.*;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final PasswordEncoder passwordEncoder;
 
@@ -33,10 +33,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(EMPLOYEE.name())
-                .antMatchers(HttpMethod.GET, "/admin/api/**").hasAnyRole(ADMIN.name(), TRAINEE.name())
-                .antMatchers(HttpMethod.POST, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.PUT, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.DELETE, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
                 .anyRequest()
                 .authenticated()
                 .and()
