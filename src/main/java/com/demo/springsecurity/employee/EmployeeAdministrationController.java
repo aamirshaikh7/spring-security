@@ -17,13 +17,13 @@ public class EmployeeAdministrationController {
     );
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN, ROLE_TRAINEE')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINEE')")
     public List<Employee> getAllEmployees() {
         return EMPLOYEES;
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN, ROLE_TRAINEE')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TRAINEE')")
     public Employee getEmployee(@PathVariable("id") Integer id) {
         return EMPLOYEES.stream()
                 .filter(employee -> id.equals(employee.getId()))
