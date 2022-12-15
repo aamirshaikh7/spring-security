@@ -1,5 +1,7 @@
 package com.demo.springsecurity.auth;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,7 +12,8 @@ public class UserService implements UserDetailsService {
 
     private final UserDao userDAO;
 
-    public UserService(UserDao userDAO) {
+    @Autowired
+    public UserService(@Qualifier("userDaoImpl") UserDao userDAO) {
         this.userDAO = userDAO;
     }
 
