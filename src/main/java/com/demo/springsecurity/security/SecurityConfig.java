@@ -1,17 +1,16 @@
 package com.demo.springsecurity.security;
 
+import com.demo.springsecurity.auth.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.concurrent.TimeUnit;
@@ -24,9 +23,12 @@ import static com.demo.springsecurity.security.UserRole.*;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final PasswordEncoder passwordEncoder;
 
+    private final UserService userService;
+
     @Autowired
-    public SecurityConfig(PasswordEncoder passwordEncoder) {
+    public SecurityConfig(PasswordEncoder passwordEncoder, UserService userService) {
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     @Override
@@ -61,33 +63,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .logoutSuccessUrl("/login");
     }
 
-    // retrieve user from database
     @Override
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
+
+    // retrieve user from database
     @Bean
-    protected UserDetailsService userDetailsService() {
-        // define user
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 
-        UserDetails employee = User.builder()
-                .username("john_doe")
-                .password(passwordEncoder.encode("password"))
-//                .roles(EMPLOYEE.name()) // ROLE_EMPLOYEE
-                .authorities(EMPLOYEE.getGrantedAuthorities())
-                .build();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userService);
 
-        UserDetails admin = User.builder()
-                .username("jane_doe")
-                .password(passwordEncoder.encode("admin"))
-//                .roles(ADMIN.name()) // ROLE_ADMIN
-                .authorities(ADMIN.getGrantedAuthorities())
-                .build();
-
-        UserDetails trainee = User.builder()
-                .username("james_doe")
-                .password(passwordEncoder.encode("trainee"))
-//                .roles(TRAINEE.name()) // ROLE_TRAINEE
-                .authorities(TRAINEE.getGrantedAuthorities())
-                .build();
-
-        return new InMemoryUserDetailsManager(employee, admin, trainee);
+        return provider;
     }
 }
