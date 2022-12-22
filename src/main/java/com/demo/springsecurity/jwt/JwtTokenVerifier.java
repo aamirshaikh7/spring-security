@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,23 +22,30 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JwtTokenVerifier extends OncePerRequestFilter {
+
+    private final JwtConfig jwtConfig;
+    private final SecretKey key;
+
+    public JwtTokenVerifier(JwtConfig jwtConfig, SecretKey key) {
+        this.jwtConfig = jwtConfig;
+        this.key = key;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader(jwtConfig.getAuthorizationHeader());
 
-        if (Strings.isNullOrEmpty(header) || !header.startsWith("Bearer ")) {
+        if (Strings.isNullOrEmpty(header) || !header.startsWith(jwtConfig.getTokenPrefix())) {
             filterChain.doFilter(request, response);
 
             return;
         }
 
-        String token = header.replace("Bearer ", "");
+        String token = header.replace(jwtConfig.getTokenPrefix(), "");
 
         try {
-            String key = "cDPODrxs2S6BXhIcMX3OCpFVGIsmlWd6xN4KkgxP3cA=";
-
             Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(key.getBytes()))
+                    .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
 
